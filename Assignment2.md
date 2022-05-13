@@ -4,7 +4,7 @@ Mathilda Nilsson
 
 
 
-##1. Säkerhetshål
+## 1. Säkerhetshål
 
 XSS - create quiz
 
@@ -60,11 +60,11 @@ Path traversal - pom.xml
 
 ---
 
-##2. Access control
+## 2. Access control
 
 
 ---
-##3. Lösenord
+## 3. Lösenord
 
 1.Vilka lösenord har användarna Angelina och Will? Ange lösenorden, efter att du har bekräftat att de stämmer genom att själv logga in som dessa användare.
 <br>
