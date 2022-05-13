@@ -1,17 +1,20 @@
 Assignment 2 <br>
 Mathilda Nilsson
 
+
+
+
 ##1. Säkerhetshål
 
 XSS - create quiz
 
-#Exploit
-
+##Exploit
 1. Logga in på hemsidan och välj create quiz.
 2. Title of quiz:  `<script>alert("")</script>`
 3. Detta kommer göra att varje gång man går in på play quiz och programet laddar title får användaren en `alert` - ruta.
 
-#Vulnerability
+##Vulnerability
+
 rad 169<br>
 
      try (Connection c = db.getConnection()) {
@@ -25,35 +28,35 @@ rad 169<br>
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, title);
 
-#Fix
+##Fix
 
 ---
 
 XSS - Search
 
-#Exploit
+##Exploit
 
 1. Skicka url ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` till någon som har ett konto på hemsidan.
 2. Användaren loggar in och får en `alert` - ruta.
 
 
-#Vulnerability
+##Vulnerability
 
-#Fix
+##Fix
 
 ---
 
 Path traversal - pom.xml
 
-#Exploit
+##Exploit
 
 1. I flags column, gå in ``http://localhost:8080/flag?name=../pom.xml``
 2. Hämta POM filen.
 3. mm
 
-#Vulnerability
+##Vulnerability
 
-#Fix
+##Fix
 
 ---
 
