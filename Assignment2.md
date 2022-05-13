@@ -87,3 +87,9 @@ Angelina -
 
 
 3.Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.
+
+
+## 4. Rate limiting
+
+
+## 5. Säkerhetsprinciper
