@@ -2,20 +2,18 @@ Assignment 2 <br>
 Mathilda Nilsson
 
 
-
-
 ## 1. Säkerhetshål
 
 XSS - create quiz
 
 ## Exploit
-1. Logga in på hemsidan och välj create quiz.
-2. Title of quiz:  `<script>alert("")</script>`
-3. Detta kommer göra att varje gång man går in på play quiz och programet laddar title får användaren en `alert` - ruta.
+1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj ``create quiz``.
+2. När du ska ge en titel till ditt quiz anger du:  `<script>alert("")</script>`
+3. Detta kommer göra att varje gång man går in på ``play`` -fliken och programet laddar in titlarna får användaren en `alert` - ruta.
 
 ## Vulnerability
 
-rad 169<br>
+Sårbarheten finns i methoden ``createQuiz``:
 
      try (Connection c = db.getConnection()) {
             // Save the quiz itself.
@@ -28,7 +26,27 @@ rad 169<br>
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, title);
 
+Genom att användarens inmatning av titeln bara tas in som en sträng och inte kontrolleras har användaren
+fritt fram till att skriva in vilken sträng den än vill. 
+
 ## Fix
+
+Vi löser detta genom att lägga in en `Encode`:
+
+        try (Connection c = db.getConnection()) {
+            // Save the quiz itself.
+            String title = context.formParam("quiz-title");
+            String testTitle = Encode.forHtml(title);
+            boolean isPublic = context.formParam("quiz-public") != null;
+            PreparedStatement s1 = c.prepareStatement(
+                "INSERT INTO quiz (user_id, title, datetime, public) VALUES (?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS
+            );
+            s1.setInt(1, context.sessionAttribute("userId"));
+            s1.setString(2, testTitle);
+
+Sätt in en Encode.forHtml som testar strängen på tecken?
+Resultatet av Encode läggs sedan in som den som sätts in i prepared statement. 
 
 ---
 
