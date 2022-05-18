@@ -80,17 +80,22 @@ Path traversal - pom.xml
 
 ## 2. Access control
 
+| 	         | 1 	   | 2     | 3	    | 4  	  | 5	   |
+|-----------|-------|-------|-------|-------|------|
+| Brad   	  | W, R	 | W, R	 | 	R    | 	R    | 	    |
+| Angelina	 | 	  R  | 	 R   | W, R	 | 	R    | 	    |
+| Will	     | 	 R   | 	 R   | 	 R   | 	W, R | W, R |
 
 ---
 ## 3. Lösenord
 
-1.Vilka lösenord har användarna Angelina och Will? Ange lösenorden, efter att du har bekräftat att de stämmer genom att själv logga in som dessa användare.
+1.<b>Vilka lösenord har användarna Angelina och Will?</b>
 <br>
 Will - `triforce`
 <br>
 Angelina -
 
-2.Hur tog du reda på detta? Förklara på teknisk nivå, inklusive varför det inte räcker att titta i filen create.sql.
+2.<b>Hur tog du reda på detta? Förklara på teknisk nivå, inklusive varför det inte räcker att titta i filen create.sql.</b>
 
        for(String pass : assignment()){
             String hash = createHashWithoutSalt(pass);
