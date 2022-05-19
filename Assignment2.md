@@ -125,14 +125,21 @@ Angelina -
 och beskriv tydligt hur du kom fram till svaret (exempelvis med en formel). Förutsätt att lösenorden testas i ordning, 
 uppifrån och ner, samt att anfallaren kan testa 10.000 lösenord per minut.</b>
 
-Brad: `apples`  595 försök / 10,000 försök per minut = 0,0595 minuter x 60 sekunder per minut = 3,57 sek. <br> 
-Angelina: `jumpstart` 77169 försök / 10,000 per minut = 7,7169 minuter = ca 7 minuter 43 sek. <br>
-Will: `triforce`  21067 försök / 10,000 försök per minut = 2,1067 minuter = ca 2 minuter 6 sek.
+- Brad: `apples` : `595 försök / 10,000 försök per minut = 0,0595 minuter x 60 sekunder per minut = 3,57 sek.` 
+- Angelina: `jumpstart` : `77169 försök / 10,000 per minut = 7,7169 minuter = ca 7 minuter 43 sek.`
+- Will: `triforce` : `21067 försök / 10,000 försök per minut = 2,1067 minuter = ca 2 minuter 6 sek.`
 
 2. <b>Hur lång tid skulle samma attack ta om applikationen begränsade varje användare till 5 inloggningsförsök per minut?
 Skriv ett svar för varje användare (Brad, Angelina, Will) och beskriv tydligt hur du kom fram till svaret (exempelvis med en formel). 
 Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i ordning, uppifrån och ner. </b>
 
+- Brad: `595 försök / 5 försök per minut = 119 minuter = 1 tim 59 min` 
+- Angelina: `77169 försök / 5 försök per minut = 15433,8 minuter / 1440 minuter per dag = 10,7179167 dagar`
+- Will: `21067 försök / 5 försök per minut = 4213,4 minuter / 1440 minutwe per dagr = 2,92597222 dagar `
+
+
+3. <b>Hur skulle applikationen behöva ändras för att begränsa antalet inloggningsförsök på detta sätt? 
+Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.</b>
 
 ---
 ## 5. Säkerhetsprinciper
