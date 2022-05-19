@@ -8,7 +8,7 @@ XSS - create quiz
 
 ## Exploit
 1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj ``create quiz``.
-2. När du ska ge en titel till ditt quiz anger du:  `<script>alert("")</script>`
+2. När du ska ge en titel till ditt quiz anger du:  `<script>alert("")</script>` och sedan sparar du quizen. 
 3. Detta kommer göra att varje gång man går in på ``play`` -fliken och programet laddar in titlarna får användaren en `alert` - ruta.
 
 ## Vulnerability
