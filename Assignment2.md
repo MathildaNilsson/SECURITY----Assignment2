@@ -29,6 +29,8 @@ Sårbarheten finns i methoden ``createQuiz``:
 Genom att användarens inmatning av titeln bara tas in som en sträng och inte kontrolleras har användaren
 fritt fram till att skriva in vilken sträng den än vill. 
 
+De som ser quizen kommer få koden executed i sin läsare. 
+
 ## Fix
 
 Vi löser detta genom att lägga in en `Encode`:
@@ -56,6 +58,11 @@ XSS - Search
 
 1. Skicka url ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` till någon som har ett konto på hemsidan.
 2. Användaren loggar in och får en `alert` - ruta.
+
+Hackern har skrivit källkod som om han var utvecklare på hemsidan, lösenordet + anv.namn skickas till 
+hackern. Användaren ser inte skillnad på hemsidan. 
+reflected säkerhetshål. Ligger i URL inte i databas, text i ett sökformmulär.
+Url innehåller det skadade på en legitim hemsida.
 
 
 ## Vulnerability
@@ -114,5 +121,24 @@ Angelina -
 ---
 ## 4. Rate limiting
 
+1. <b>Hur lång tid skulle det ta för någon med tillgång till filen 100k.txt att hitta användarnas lösenord med en online brute-force-attack? Skriv ett svar för varje användare (Brad, Angelina, Will)
+och beskriv tydligt hur du kom fram till svaret (exempelvis med en formel). Förutsätt att lösenorden testas i ordning, 
+uppifrån och ner, samt att anfallaren kan testa 10.000 lösenord per minut.</b>
+
+Brad: `apples`  595 försök / 10,000 försök per minut = 0,0595 minuter x 60 sekunder per minut = 3,57 sek. <br> 
+Angelina: `jumpstart` 77169 försök / 10,000 per minut = 7,7169 minuter = ca 7 minuter 43 sek. <br>
+Will: `triforce`  21067 försök / 10,000 försök per minut = 2,1067 minuter = ca 2 minuter 6 sek.
+
+2. <b>Hur lång tid skulle samma attack ta om applikationen begränsade varje användare till 5 inloggningsförsök per minut?
+Skriv ett svar för varje användare (Brad, Angelina, Will) och beskriv tydligt hur du kom fram till svaret (exempelvis med en formel). 
+Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i ordning, uppifrån och ner. </b>
+
+
 ---
 ## 5. Säkerhetsprinciper
+
+<b>Vilka är de viktigaste lärdomarna och principerna om säkerhet som du kommer att ta med dig från denna kurs?</b>
+
+- Vad användare kan använda för input .. Som kan skada säkerhet/program.. Enkelt att attackera pga input
+- Blockera input från användare .. Lärt att/hur begränsningarna funkar
+- Varje gång vi får input? Vad kan användaren skicka in? 
