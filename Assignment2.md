@@ -81,7 +81,28 @@ Path traversal - pom.xml
 
 ## Vulnerability
 
+Sårbarheten finns i metoden `singleFlagPage`:
+
+    private static void singleFlagPage(Context context) throws IOException {
+        String flagName = context.queryParam("name");
+        Path path = Path.of("flags/" + flagName);
+        String svg = Files.readString(path);
+        context.contentType("image/svg+xml; charset=UTF-8");
+        context.result(svg);
+    }
+
+
+
 ## Fix
+
+    private static void singleFlagPage(Context context) throws IOException {
+        String flagName = context.queryParam("name");
+        Path path = Path.of("flags/" + flagName).toAbsolutePath().normalize();
+        Path folder = Path.of("flags").toRealPath();
+        if(!path.startsWith((folder))){
+            context.result("Not allowed entry");
+            return;
+        }
 
 ---
 
@@ -100,7 +121,7 @@ Path traversal - pom.xml
 <br>
 Will - `triforce`
 <br>
-Angelina -
+Angelina - `jumpstart`
 
 2.<b>Hur tog du reda på detta? Förklara på teknisk nivå, inklusive varför det inte räcker att titta i filen create.sql.</b>
 
@@ -116,7 +137,7 @@ Angelina -
         }
 
 
-3.Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.
+3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
 
 ---
 ## 4. Rate limiting
@@ -140,6 +161,8 @@ Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i o
 
 3. <b>Hur skulle applikationen behöva ändras för att begränsa antalet inloggningsförsök på detta sätt? 
 Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.</b>
+
+Försök förklara hur sådan kod/lösning skulle se ut. 
 
 ---
 ## 5. Säkerhetsprinciper
