@@ -131,6 +131,8 @@ vi oss av ``toRealPath`` .
 Genom att kontrollera att URL:en `path` som användaren namngett och som vi normaliserat motsvarar den Path vi skapat av referensen av vår `folder` kan vi säkerställa att
 användaren inte kommer runt säkerheten i applikationen och får istället ett felmeddelande som säger
 att det inte är tillåtet att komma åt andra mappar än den utvecklaren satt upp som default.
+
+
 ---
 
 ## 2. Access control
