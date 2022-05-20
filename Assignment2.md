@@ -49,6 +49,10 @@ Vi löser detta genom att lägga in en `Encode`:
 
 Sätt in en Encode.forHtml som testar strängen på tecken?
 Resultatet av Encode läggs sedan in som den som sätts in i prepared statement. 
+Blir ofarlig och skrivs ut som en vanlig String.
+Encoda innan databas!!!
+Innan encode Html
+Efter något annat
 
 ---
 
@@ -65,11 +69,63 @@ reflected säkerhetshål. Ligger i URL inte i databas, text i ett sökformmulär
 Url innehåller det skadade på en legitim hemsida.
 
 
+
 ## Vulnerability
+
+Sårbarheten finns i metoden `searchPage`:
+
+        if (context.queryParam("search") != null) {
+            // Show what term the user searched for.
+            content +=
+                "<p>Search results for: " + context.queryParam("search") + "</p>" +
+                "<ul>";
+
+            try (Connection c = db.getConnection()) {
+                // Make sure to only get the quizzes that are public or belong to the current user.
+                PreparedStatement s = c.prepareStatement(
+                    "SELECT quiz.id AS quiz_id, title, username, public " +
+                    "FROM quiz " +
+                    "JOIN user ON quiz.user_id = user.id " +
+                    "WHERE instr(title, ?) " +
+                    "AND (public = TRUE OR user.id = ?)"
+                );
+                s.setString(1, context.queryParam("search"));
+                s.setInt(2, context.sessionAttribute("userId"));
+
+Inget som testar inputen av användaren .. Man tar bara queryParam rakt av och kör in det i databasen.
+
 
 ## Fix
 
+Vi lägger till följande kod i metoden ``searchPage``:
+
+        if (context.queryParam("search") != null) {
+            // Show what term the user searched for.
+            String search = context.queryParam("Search");
+            content +=
+                "<p>Search results for: " + Encode.forHtml(search) + "</p>" +
+                "<ul>";
+
+            try (Connection c = db.getConnection()) {
+                // Make sure to only get the quizzes that are public or belong to the current user.
+                PreparedStatement s = c.prepareStatement(
+                    "SELECT quiz.id AS quiz_id, title, username, public " +
+                    "FROM quiz " +
+                    "JOIN user ON quiz.user_id = user.id " +
+                    "WHERE instr(title, ?) " +
+                    "AND (public = TRUE OR user.id = ?)"
+                );
+                s.setString(1, (context.queryParam("search")));
+                s.setInt(2, context.sessionAttribute("userId"));
+
+
+Få ut resultatet av användarens input i Context.queryParam
+Ta resultatet och testa det i en Encode.
+Skriv ut resultatet till användaren 
+Använd sedan den encodade strängen för att söka efter quizzar i databasen. 
+
 ---
+
 
 <b>Path traversal - pom.xml</b>
 
@@ -119,7 +175,7 @@ Vi lägger till följande kod i metoden `singleFlagPage`:
         }
 
 
-Vi vill begränsa vad användaren kan skriva in i `queryParam("name")` fältet
+Vi vill begränsa vad användaren kan skriva in i `queryParam("name")` dvs URL fältet
 och gör detta genom att skapa Path objekt som vi kan referera till. <br>
 Vi skapar en Path av den input vi fått av användaren i `queryParam`, där vi sätter `"flags/"` + `flagName` och
 använder oss av ``toAbsolutPath`` vilket kommer returnera en Path som representerar den absoluta pathen som
