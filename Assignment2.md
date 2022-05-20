@@ -71,7 +71,7 @@ Url innehåller det skadade på en legitim hemsida.
 
 ---
 
-Path traversal - pom.xml
+<b>Path traversal - pom.xml</b>
 
 ## Exploit
 
