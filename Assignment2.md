@@ -201,6 +201,11 @@ Angelina - `jumpstart`
 
 2.<b>Hur tog du reda på detta? Förklara på teknisk nivå, inklusive varför det inte räcker att titta i filen create.sql.</b>
 
+Eftersom att de lösenord som ligger i `create.sql` är hashade måste man jämföra dem med hashade lösenord, det är inte lika enkelt att ta ett 
+redan hashat lösenord och få tillbaka det ursprungsform. <br>
+För att få fram lösenordet körde jag igenom alla 100 000 vanligaste lösenord genom en metod som hashar dem och sedan jämför de hashade lösenorden med 
+lösenorden som låg i databasen:
+
        for(String pass : assignment()){
             String hash = createHashWithoutSalt(pass);
             if(hash.equals("7d533f81b0943bec5c4feb7b2e25d341986e0e84465c2b64107d597f1b71133f1b605d30eb28aada2c4d5801290ae3a28735a5eb4aea5c2fbfcb63c03ad511cc")){
@@ -211,6 +216,11 @@ Angelina - `jumpstart`
             i++;
             System.out.println(i);
         }
+
+Där assignment är en lista på alla 100,000 lösenord. För varje lösenord i listan hashade jag dem och sedan matchade dem mot det hashade
+lösenordet som vi ville knäcka. 
+
+Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft tillgång till `create.sql`filen och hade då behövt göra en `SQLinjection` attack på applikationen. 
 
 
 3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
@@ -231,8 +241,8 @@ Skriv ett svar för varje användare (Brad, Angelina, Will) och beskriv tydligt 
 Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i ordning, uppifrån och ner. </b>
 
 - Brad: `595 försök / 5 försök per minut = 119 minuter = 1 tim 59 min` 
-- Angelina: `77169 försök / 5 försök per minut = 15433,8 minuter / 1440 minuter per dag = 10,7179167 dagar`
-- Will: `21067 försök / 5 försök per minut = 4213,4 minuter / 1440 minutwe per dagr = 2,92597222 dagar `
+- Angelina: `77169 försök / 5 försök per minut = 15433,8 minuter / 1440 minuter per dag = 10,7179167 dagar = mellan 10-11 dagar`
+- Will: `21067 försök / 5 försök per minut = 4213,4 minuter / 1440 minuter per dag = 2,92597222 dagar = nästan 3 dagar `
 
 
 3. <b>Hur skulle applikationen behöva ändras för att begränsa antalet inloggningsförsök på detta sätt? 
