@@ -27,7 +27,7 @@ Sårbarheten finns i methoden ``createQuiz``:
             s1.setString(2, title);
 
 Genom att användarens inmatning av titeln bara tas in som en sträng och inte kontrolleras har användaren
-fritt fram till att skriva in vilken sträng den än vill. 
+fritt fram till att skriva in vilken sträng den vill. 
 
 De som ser quizen kommer få koden körd i sin webbläsare.  
 
