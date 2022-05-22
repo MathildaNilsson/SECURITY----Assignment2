@@ -4,7 +4,7 @@ Mathilda Nilsson
 
 ## 1. Säkerhetshål
 
-XSS - create quiz
+<b>XSS - create quiz</b>
 
 ## Exploit
 1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj ``create quiz``.
@@ -56,7 +56,7 @@ Efter något annat
 
 ---
 
-XSS - Search
+<b>XSS - Search</b>
 
 ## Exploit
 
