@@ -29,7 +29,7 @@ Sårbarheten finns i methoden ``createQuiz``:
 Genom att användarens inmatning av titeln bara tas in som en sträng och inte kontrolleras har användaren
 fritt fram till att skriva in vilken sträng den än vill. 
 
-De som ser quizen kommer få koden executed i sin läsare. 
+De som ser quizen kommer få koden körd i sin webbläsare.  
 
 ## Fix
 
@@ -60,15 +60,12 @@ XSS - Search
 
 ## Exploit
 
-1. Skicka url ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` till någon som har ett konto på hemsidan.
-2. Användaren loggar in och får en `alert` - ruta.
-
-Hackern har skrivit källkod som om han var utvecklare på hemsidan, lösenordet + anv.namn skickas till 
-hackern. Användaren ser inte skillnad på hemsidan. 
-reflected säkerhetshål. Ligger i URL inte i databas, text i ett sökformmulär.
-Url innehåller det skadade på en legitim hemsida.
-
-
+1. Gå till hemsidan `(http://localhost:8080/)`
+2. Logga in som en användare och välj `Search` fliken.
+3. Klistra in `<script>alert("")</script>"` i sökrutan.
+4. Detta skapar URL: ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` 
+ som man kan skicka till någon som har ett konto på hemsidan.
+5. Användaren som fått länken loggar in och får en `alert` - ruta.
 
 ## Vulnerability
 
@@ -79,33 +76,6 @@ Sårbarheten finns i metoden `searchPage`:
             content +=
                 "<p>Search results for: " + context.queryParam("search") + "</p>" +
                 "<ul>";
-
-            try (Connection c = db.getConnection()) {
-                // Make sure to only get the quizzes that are public or belong to the current user.
-                PreparedStatement s = c.prepareStatement(
-                    "SELECT quiz.id AS quiz_id, title, username, public " +
-                    "FROM quiz " +
-                    "JOIN user ON quiz.user_id = user.id " +
-                    "WHERE instr(title, ?) " +
-                    "AND (public = TRUE OR user.id = ?)"
-                );
-                s.setString(1, context.queryParam("search"));
-                s.setInt(2, context.sessionAttribute("userId"));
-
-Inget som testar inputen av användaren .. Man tar bara queryParam rakt av och kör in det i databasen.
-
-
-## Fix
-
-Vi lägger till följande kod i metoden ``searchPage``:
-
-        if (context.queryParam("search") != null) {
-            // Show what term the user searched for.
-            String search = context.queryParam("Search");
-            content +=
-                "<p>Search results for: " + Encode.forHtml(search) + "</p>" +
-                "<ul>";
-
             try (Connection c = db.getConnection()) {
                 // Make sure to only get the quizzes that are public or belong to the current user.
                 PreparedStatement s = c.prepareStatement(
@@ -118,11 +88,32 @@ Vi lägger till följande kod i metoden ``searchPage``:
                 s.setString(1, (context.queryParam("search")));
                 s.setInt(2, context.sessionAttribute("userId"));
 
+I denna metoden finns det ingenting som testar användarens `input` i sökfältet, man tar bara rakt av det som skrivits in en ``queryParam``
+och kör det mot databasen. Problemet som uppstår här ligger just i `queryParam`, då inputen som användaren skriver in där kommer att visas 
+som ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` i URL:en.
 
-Få ut resultatet av användarens input i Context.queryParam
-Ta resultatet och testa det i en Encode.
-Skriv ut resultatet till användaren 
-Använd sedan den encodade strängen för att söka efter quizzar i databasen. 
+Det som blir möjligt med denna sårbarheten är att en potentiell hacker kan skriva egen källkod som om den var en utvecklare på hemsidan.
+Man kan då skriva in kod som ger ny karaktär, utseende och manipulera hemsidan till att visa nya sökfält/användatfält för andra användare
+som loggar in men den nya URL:en. Man kan manipulera hemsidan så att en användare inte ser skillnad på URL/layout som gör att utomstående tror på hemsidan och
+skriver in personliga uppgifter som skickas tilll den hacker som skapat attacken. 
+
+Url innehåller det skadade på en legitim hemsida.
+
+## Fix
+
+Vi lägger till följande kod i metoden ``searchPage``:
+
+        if (context.queryParam("search") != null) {
+            // Show what term the user searched for.
+            String search = context.queryParam("Search");
+            content +=
+                "<p>Search results for: " + Encode.forHtml(search) + "</p>" +
+                "<ul>";
+
+Vi skapar en String för  att returnera värdet av `context.queryParam("Search")` så vi kan testa användarens input.
+Vi tar värdet av `String search` och testar det för HTML genom att sätta en `Encode` och skriver ut resultatet till användaren. 
+Har användaren försökt lägga in `script/html` värden kommer applikationen returnera `NULL`.
+
 
 ---
 
@@ -151,7 +142,7 @@ Sårbarheten finns i metoden `singleFlagPage`:
     }
 
 Detta går att göra för att `String flagName` sätts in av användaren genom en `context.queryParam`.
-När man sedan sätter Path så adderas bara användarens input med "flags/" där utvecklaren tänkt att alla bilder på
+När man sedan sätter Path så adderas bara användarens input med `"flags/"` där utvecklaren tänkt att alla bilder på
 flaggorna skulle hämtas från. På detta sätt ger man en poteniell hacker full makt till att skriva
 in precis vad den vill i fältet som en sträng och där av kunna hämta ut vilken fil som helst.
 
@@ -176,7 +167,7 @@ Vi lägger till följande kod i metoden `singleFlagPage`:
 
 
 Vi vill begränsa vad användaren kan skriva in i `queryParam("name")` dvs URL fältet
-och gör detta genom att skapa Path objekt som vi kan referera till. <br>
+och gör detta genom att skapa ett Path objekt som vi kan referera till. <br>
 Vi skapar en Path av den input vi fått av användaren i `queryParam`, där vi sätter `"flags/"` + `flagName` och
 använder oss av ``toAbsolutPath`` vilket kommer returnera en Path som representerar den absoluta pathen som
 ännu inte finns. Sedan använder vi oss av ``normalize`` för att returnera ett resultat av en Path som tar bort alla oväntade värden så som: `../`, `./` etc. <br>
