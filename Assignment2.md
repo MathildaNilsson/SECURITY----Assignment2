@@ -47,11 +47,16 @@ Vi löser detta genom att lägga in en `Encode`:
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, testTitle);
 
-Sätt in en Encode.forHtml som testar strängen på tecken?
-Resultatet av Encode läggs sedan in som den som sätts in i prepared statement. 
-Blir ofarlig och skrivs ut som en vanlig String.
-Encoda innan databas!!!
-Innan encode Html
+-Sätt in en `Encode.forHtml` som testar strängen på tecken
+
+-Resultatet av Encode läggs sedan in som den som sätts in i prepared statement. 
+
+-Blir ofarlig och skrivs ut som en vanlig String.
+
+-Encoda innan databas!!!
+
+-Innan encode Html
+
 Efter något annat
 
 ---
@@ -225,6 +230,8 @@ Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft till
 
 3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
 
+- Lägga till salt på lösenord?
+
 ---
 ## 4. Rate limiting
 
@@ -248,7 +255,9 @@ Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i o
 3. <b>Hur skulle applikationen behöva ändras för att begränsa antalet inloggningsförsök på detta sätt? 
 Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.</b>
 
-Försök förklara hur sådan kod/lösning skulle se ut. 
+Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
+eller hemsidan ska låta användaren testa att logga in igen. <br>
+
 
 ---
 ## 5. Säkerhetsprinciper
