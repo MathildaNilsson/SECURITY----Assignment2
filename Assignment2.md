@@ -4,7 +4,7 @@ Mathilda Nilsson
 
 ## 1. Säkerhetshål
 
-<b>XSS - create quiz</b>
+**XSS - create quiz**
 
 ## Exploit
 1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj ``create quiz``.
@@ -26,10 +26,12 @@ Sårbarheten finns i methoden ``createQuiz``:
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, title);
 
-Genom att användarens inmatning av titeln bara tas in som en sträng och inte kontrolleras har användaren
+Genom att användarens inmatning av titeln bara tas in som en sträng genom `context.formParam` och inte kontrolleras har användaren
 fritt fram till att skriva in vilken sträng den vill. 
 
-De som ser quizen kommer få koden körd i sin webbläsare.  
+De som ser quizen kommer få koden körd i sin webbläsare..
+
+**!BEHÖVS GÖRAS KLART!**
 
 ## Fix
 
@@ -47,21 +49,16 @@ Vi löser detta genom att lägga in en `Encode`:
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, testTitle);
 
--Sätt in en `Encode.forHtml` som testar strängen på tecken
+Vi sätter in en `Encode.forHtml` som testar strängen på HTML kod och returnerar resultatet av encoded som en sträng. 
+Resultatet av Encode är det som vi lägger in i vårt prepared statement för att undvika att få in osäker input in i vår databas. <br>
 
--Resultatet av Encode läggs sedan in som den som sätts in i prepared statement. 
 
--Blir ofarlig och skrivs ut som en vanlig String.
+Genom att använda oss av en `Encode` ser vi till att inputen blir ofarlig och istället hanteras som en helt vanlig ren sträng. 
 
--Encoda innan databas!!!
-
--Innan encode Html
-
-Efter något annat
 
 ---
 
-<b>XSS - Search</b>
+**XSS - Search**
 
 ## Exploit
 
@@ -123,7 +120,7 @@ Har användaren försökt lägga in `script/html` värden kommer applikationen r
 ---
 
 
-<b>Path traversal - pom.xml</b>
+**Path traversal - pom.xml**
 
 ## Exploit
 
@@ -232,6 +229,8 @@ Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft till
 
 - Lägga till salt på lösenord?
 
+**!BEHÖVS GÖRAS KLART!**
+
 ---
 ## 4. Rate limiting
 
@@ -258,12 +257,18 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
 
+**!BEHÖVS GÖRAS KLART!**
 
 ---
 ## 5. Säkerhetsprinciper
 
-<b>Vilka är de viktigaste lärdomarna och principerna om säkerhet som du kommer att ta med dig från denna kurs?</b>
+**Vilka är de viktigaste lärdomarna och principerna om säkerhet som du kommer att ta med dig från denna kurs?**
 
-- Vad användare kan använda för input .. Som kan skada säkerhet/program.. Enkelt att attackera pga input
-- Blockera input från användare .. Lärt att/hur begränsningarna funkar
-- Varje gång vi får input? Vad kan användaren skicka in? 
+Jag hade inte jättemycket erfarenhet om säker mjukvara innan vi började kursen men känner att jag fått med mig väldigt mycket
+kunskap och nyttiga tankeställare som kan vara bra att ta med mig ut i arbetslivet. 
+Dels har man fått stor inblick i hur stor makt användare kan få om man inte kontrollerar deras input via text/formulär i sin applikation/hemsida.
+Användare kan använda inputs till att göra allt från att få fram hemliga filer genom `Path Traversal`, skicka in HTML kod via 
+`Cross Site Script` till att få åtkomst till databas via `SQL injection, vilket kan göra stor skada mot säkerheten. 
+<br><br>
+Jag tar även med mig all bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
+begränsningarna man lägger in fungerar. 
