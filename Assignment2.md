@@ -242,10 +242,31 @@ Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft till
 
 3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
 
-- Lägga till salt på lösenord?
-- Lägg till create hash
+För att förhundra denna attack kan man lägga till `Salt` på alla de sparade lösenorden. `Salt`är ett extra slags lager som hashar lösenorden med unika tecken för att öka deras komplexitet
+utan att försvåra det för användarna när dem väljer lösenord. Så även om vi har flera användare som har samma lösenord kommer alla dessa lösenord få unika tecken och göra det extra svårt för hackers att 
+knäcka lösenorden i en eventuell läcka. Att addera salt på lösenorden saktar även ner poteniella `dictonary och brut-force attacker`.
 
-**!BEHÖVS GÖRAS KLART!**
+Först skapas unik salt:
+
+    public static String createSalt() {
+        byte[] saltBytes = new byte[128];
+        new SecureRandom().nextBytes(saltBytes);
+        String salt = Hex.encodeHexString(saltBytes);
+        return salt;
+    }
+
+Sedan skickar man in `lösenord` och `salt` för att säkerställa att alla sparade lösenord blir unika hash:
+
+
+    public static String createHash(String password, String salt) {
+        try {
+            // NIST recommends an iteration count of at least 10,000.
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 10000, 256);
+            byte[] hashBytes = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
+            String hash = Hex.encodeHexString(hashBytes);
+            return hash;
+        }
+
 
 ---
 ## 4. Rate limiting
@@ -272,6 +293,7 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
+
 Ändra log in metoden. 
 
 **!BEHÖVS GÖRAS KLART!**
@@ -285,7 +307,9 @@ Jag hade inte jättemycket erfarenhet om säker mjukvara innan vi började kurse
 kunskap och nyttiga tankeställare som kan vara bra att ta med mig ut i arbetslivet. 
 Dels har man fått stor inblick i hur stor makt användare kan få om man inte kontrollerar deras input via text/formulär i sin applikation/hemsida.
 Användare kan använda inputs till att göra allt från att få fram hemliga filer genom `Path Traversal`, skicka in HTML kod via 
-`Cross Site Script` till att få åtkomst till databas via `SQL injection, vilket kan göra stor skada mot säkerheten. 
+`Cross Site Script` till att få åtkomst till databas via `SQL injection`, vilket kan göra stor skada mot säkerheten. 
 <br><br>
 Jag tar även med mig all bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
 begränsningarna man lägger in fungerar. 
+
+Lösenord 
