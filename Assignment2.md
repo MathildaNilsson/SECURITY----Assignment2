@@ -110,7 +110,7 @@ Man kan då skriva in kod som ger ny karaktär, utseende och manipulera hemsidan
 som loggar in men den nya URL:en. Man kan manipulera hemsidan så att en användare inte ser skillnad på URL/layout som gör att utomstående tror på hemsidan och
 skriver in personliga uppgifter som skickas tilll den hacker som skapat attacken. 
 
-Denna typ av XSS attack kallas `Reflected XSS Attack` eftersom att den utförs via en Webb genom text 
+Denna typ av XSS attack kallas `Reflected XSS Attack` eftersom att den utförs via en Webb genom tex:
 ett sökresultat. `Reflected attacks` skickas till den utsatta via andra vägar än på själva hemsidan. Det kan tex vara via mejl eller andra hemsidor. 
 
 
