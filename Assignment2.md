@@ -196,6 +196,37 @@ Genom att kontrollera att URL:en `path` som användaren namngett och som vi norm
 användaren inte kommer runt säkerheten i applikationen och får istället ett felmeddelande som säger
 att det inte är tillåtet att komma åt andra mappar än den utvecklaren satt upp som default.
 
+---
+
+**SQL injection - reveal private quiz**
+
+## Exploit
+
+1. Gå till hemsidan `(http://localhost:8080/)` 
+2. Logga in som `Brad` med lösenord `apples` och gå in på `PLAY` fliken.
+3. Välj en quiz `Actors by Angelina` och notera att URL är `http://localhost:8080/play/3`
+4. Ändra URL så den blir: `http://localhost:8080/play/5`, då kommer ett fel meddelande `"No quiz with ID 5, or you are not allowed to access this quiz."`
+5. Lägg till `--` i slutet av URL : `http://localhost:8080/play/5--` detta gör att du nu får åtkomst till den privata quizen. 
+
+
+## Vulnerability
+
+    private static void singleQuizData(Context context) throws SQLException {
+        try (Connection c = db.getConnection()) {
+            // Get the quiz info and put it in a map.
+            Statement quizStatement = c.createStatement();
+            String quizSql =
+                "SELECT * FROM quiz " +
+                // Either the current user owns the quiz and can access it whether it's public or not.
+                "WHERE id = " + context.pathParam("quiz_id") + " " +
+                "AND user_id = " + context.sessionAttribute("userId") + " " +
+                // Or it's public and anybody can access it.
+                "OR public = TRUE AND id = " + context.pathParam("quiz_id");
+            ResultSet quizRows = quizStatement.executeQuery(quizSql);
+
+## Fix
+
+
 
 ---
 
@@ -294,6 +325,7 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
 
+
 Ändra log in metoden. 
 
 **!BEHÖVS GÖRAS KLART!**
@@ -304,7 +336,7 @@ eller hemsidan ska låta användaren testa att logga in igen. <br>
 **Vilka är de viktigaste lärdomarna och principerna om säkerhet som du kommer att ta med dig från denna kurs?**
 
 Jag hade inte jättemycket erfarenhet om säker mjukvara innan vi började kursen men känner att jag fått med mig väldigt mycket
-kunskap och nyttiga tankeställare som kan vara bra att ta med mig ut i arbetslivet. 
+kunskap och nyttiga tankeställare som kan vara bra att ta med mig ut i arbetslivet men även privat.
 Dels har man fått stor inblick i hur stor makt användare kan få om man inte kontrollerar deras input via text/formulär i sin applikation/hemsida.
 Användare kan använda inputs till att göra allt från att få fram hemliga filer genom `Path Traversal`, skicka in HTML kod via 
 `Cross Site Script` till att få åtkomst till databas via `SQL injection`, vilket kan göra stor skada mot säkerheten. 
