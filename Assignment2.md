@@ -26,12 +26,18 @@ Sårbarheten finns i methoden ``createQuiz``:
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, title);
 
-Genom att användarens inmatning av titeln bara tas in som en sträng genom `context.formParam` och inte kontrolleras har användaren
-fritt fram till att skriva in vilken sträng den vill. 
+Genom att användarens inmatning av titeln tas in som en sträng genom `context.formParam` och inte kontrolleras har användaren
+fritt fram till att skriva in vilken sträng den vill. Eftersom vi inte har en metod som kollar eller begränsar vad det är för tecken 
+som kommer in av användaren kan den skriva in tecken som `<`, `>` och på så sätt för det möjligt att utsätta hemsidan för en 
+cross site script attack. 
 
-De som ser quizen kommer få koden körd i sin webbläsare..
+`String title` blir resultatet av inputen i `context.formParam` och sätts direkt in i databasen. Detta gör att varje gång någon öppnar 
+`Play` fliken i spelet kommer titlarna laddas in och har man tillgång till denna quiz där attacken är skapad i titeln kommer man bli utsatt 
+för attacken. 
 
-**!BEHÖVS GÖRAS KLART!**
+Detta är en `Stored XSS Attacks` eftersom att attacken är permanent lagrad via titel i quizzens databas. Den som blir utsatt för attacken blir utsatt när
+applikationen hämtar information från databasen där scriptet är lagrat. 
+
 
 ## Fix
 
@@ -49,11 +55,16 @@ Vi löser detta genom att lägga in en `Encode`:
             s1.setInt(1, context.sessionAttribute("userId"));
             s1.setString(2, testTitle);
 
-Vi sätter in en `Encode.forHtml` som testar strängen på HTML kod och returnerar resultatet av encoded som en sträng. 
+Vi sätter in en `Encode.forHtml` som encodar strängen på HTML kod och returnerar resultatet av encoden som en sträng. 
+`Encode.forHtml` kommer att ta `<` och `>` som bildar javascript kod och encoda dem till specialtecken vilket gör att det lagras som
+en ren sträng i databasen och blir ofarlig för applikationen och användare. 
+Exempel:
+<br>
+`<` till `&lt`
+<br>
+`>`till `&gt`
+<br>
 Resultatet av Encode är det som vi lägger in i vårt prepared statement för att undvika att få in osäker input in i vår databas. <br>
-
-
-Genom att använda oss av en `Encode` ser vi till att inputen blir ofarlig och istället hanteras som en helt vanlig ren sträng. 
 
 
 ---
@@ -90,7 +101,7 @@ Sårbarheten finns i metoden `searchPage`:
                 s.setString(1, (context.queryParam("search")));
                 s.setInt(2, context.sessionAttribute("userId"));
 
-I denna metoden finns det ingenting som testar användarens `input` i sökfältet, man tar bara rakt av det som skrivits in en ``queryParam``
+I denna metoden finns det ingenting som kontrollerar användarens `input` i sökfältet, man tar bara rakt av det som skrivits in en ``queryParam``
 och kör det mot databasen. Problemet som uppstår här ligger just i `queryParam`, då inputen som användaren skriver in där kommer att visas 
 som ``http://localhost:8080/search?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E`` i URL:en.
 
@@ -99,7 +110,9 @@ Man kan då skriva in kod som ger ny karaktär, utseende och manipulera hemsidan
 som loggar in men den nya URL:en. Man kan manipulera hemsidan så att en användare inte ser skillnad på URL/layout som gör att utomstående tror på hemsidan och
 skriver in personliga uppgifter som skickas tilll den hacker som skapat attacken. 
 
-Url innehåller det skadade på en legitim hemsida.
+Denna typ av XSS attack kallas `Reflected XSS Attack` eftersom att den utförs via en Webb genom text 
+ett sökresultat. `Reflected attacks` skickas till den utsatta via andra vägar än på själva hemsidan. Det kan tex vara via mejl eller andra hemsidor. 
+
 
 ## Fix
 
@@ -112,9 +125,11 @@ Vi lägger till följande kod i metoden ``searchPage``:
                 "<p>Search results for: " + Encode.forHtml(search) + "</p>" +
                 "<ul>";
 
-Vi skapar en String för  att returnera värdet av `context.queryParam("Search")` så vi kan testa användarens input.
-Vi tar värdet av `String search` och testar det för HTML genom att sätta en `Encode` och skriver ut resultatet till användaren. 
-Har användaren försökt lägga in `script/html` värden kommer applikationen returnera `NULL`.
+Vi skapar en String för  att returnera värdet av `context.queryParam("Search")` så vi kan encoda användarens input.
+Vi tar värdet av `String search` och encodar det för HTML genom att sätta en `Encode` och skriver ut resultatet till användaren.
+`Encode.forHtml` kommer att ta `<` och `>` som bildar javascript kod och encoda dem till specialtecken vilket gör att det lagras som
+en ren sträng och blir ofarlig för applikationen och användare. 
+Applikationen kommer att leta efter ett sökresultat som är encodat till en ren sträng och returnera resultatet av det. 
 
 
 ---
@@ -228,6 +243,7 @@ Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft till
 3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
 
 - Lägga till salt på lösenord?
+- Lägg till create hash
 
 **!BEHÖVS GÖRAS KLART!**
 
@@ -256,6 +272,7 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
+Ändra log in metoden. 
 
 **!BEHÖVS GÖRAS KLART!**
 
