@@ -60,9 +60,9 @@ Vi sätter in en `Encode.forHtml` som encodar strängen på HTML kod och returne
 en ren sträng i databasen och blir ofarlig för applikationen och användare. 
 Exempel:
 <br>
-`<` till `&lt`
+`<` till `&lt;`
 <br>
-`>`till `&gt`
+`>`till `&gt;`
 <br>
 Resultatet av Encode är det som vi lägger in i vårt prepared statement för att undvika att få in osäker input in i vår databas. <br>
 
@@ -211,6 +211,8 @@ att det inte är tillåtet att komma åt andra mappar än den utvecklaren satt u
 
 ## Vulnerability
 
+Sårbarheten finns i metoden `singleQuizData`:
+
     private static void singleQuizData(Context context) throws SQLException {
         try (Connection c = db.getConnection()) {
             // Get the quiz info and put it in a map.
@@ -224,8 +226,35 @@ att det inte är tillåtet att komma åt andra mappar än den utvecklaren satt u
                 "OR public = TRUE AND id = " + context.pathParam("quiz_id");
             ResultSet quizRows = quizStatement.executeQuery(quizSql);
 
+När hackern använder sig av `--` gör man detta för att använda sig av SQL kommentars syntax. Det som matas in efter och hämtas av SQL queryt -- kommer bli bortkommenterat.
+Detta funkar pga att applikationen använder sig av ren SQL i executeQuery. quizid sätts i metoden `context.sessionAttribute("userId")` där quizid sätts i URL och requestar efter den specifika quizen med det id:et.
+SQL queryt som skickas till databasen blir då: `ResultSet quizRows = quizStatement.executeQuery(quizSql);` där `String quizSql` är : `SELECT * FROM quiz WHERE id = 5 AND user_id = 1 OR public = TRUE AND id = 5`
+Resultatet är tänkt att bli att användaren ska få fram quizzet med id 5 och som är publikt för just den användaren som är inloggad. 
+
+Detta betyder att lägger hackern in ``--`` kommer SQL queryt ändras till:
+`SELECT * FROM quiz WHERE id = 5`
+Vilket resulterar i att SQL kommandot kommer hämta quizet med id = 5 och ladda in det utan att sätta begränsningar på vem som är inloggad och om quizen är publikt eller inte.
+
+
 ## Fix
 
+Vi täpper igen säkerhetshålet genom att använda oss av PreparedStatement:
+
+    private static void singleQuizData(Context context) throws SQLException {
+        try (Connection c = db.getConnection()) {
+            int userId = context.sessionAttribute("userId");
+            String quizSql = "SELECT * FROM quiz WHERE id =? AND user_id =? OR public =? AND id =?";
+            PreparedStatement s = c.prepareStatement(quizSql);
+            s.setString(1,context.pathParam("quiz_id"));
+            s.setInt(2, userId);
+            s.setBoolean(3, true);
+            s.setString(4,context.pathParam("quiz_id"));
+            ResultSet quizRows = s.executeQuery();
+
+Genom att använda oss av PreparedStatements kan vi begränsa användarinput i URL som sätts i ``pathParam``. PreparedStatements kommer att tolka inputen som värden och inte som ett rent SQL query där `'` används som fritext och som en hacker kan utnyttja och sätta in eget ``' för att ändra queryt.
+
+Utan det som PreparedStatement hjälper oss att göra är vi specificerar vart i queryt vi vill ha användarens input med `?`.
+Vi kan sedan med hjälp av PreparedStatement specificera vad vi vill ha för värde på varje `?` med `setString`, `setInt`, `setBoolean` och applikationen kommer då att endast tolka varje värde som en satt sträng.
 
 
 ---
@@ -324,7 +353,6 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
-
 
 Ändra log in metoden. 
 
