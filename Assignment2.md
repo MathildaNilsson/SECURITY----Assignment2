@@ -251,7 +251,7 @@ Vi täpper igen säkerhetshålet genom att använda oss av PreparedStatement:
             s.setString(4,context.pathParam("quiz_id"));
             ResultSet quizRows = s.executeQuery();
 
-Genom att använda oss av PreparedStatements kan vi begränsa användarinput i URL som sätts i ``pathParam``. PreparedStatements kommer att tolka inputen som värden och inte som ett rent SQL query där `'` används som fritext och som en hacker kan utnyttja och sätta in eget ``' för att ändra queryt.
+Genom att använda oss av PreparedStatements kan vi begränsa användarinput i URL som sätts i ``pathParam``. PreparedStatements kommer att tolka inputen som värden och inte som ett rent SQL query där `'` används som fritext och som en hacker kan utnyttja och sätta in eget `'` för att ändra queryt.
 
 Utan det som PreparedStatement hjälper oss att göra är vi specificerar vart i queryt vi vill ha användarens input med `?`.
 Vi kan sedan med hjälp av PreparedStatement specificera vad vi vill ha för värde på varje `?` med `setString`, `setInt`, `setBoolean` och applikationen kommer då att endast tolka varje värde som en satt sträng.
