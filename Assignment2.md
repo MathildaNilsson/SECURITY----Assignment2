@@ -259,6 +259,59 @@ Vi kan sedan med hjälp av PreparedStatement specificera vad vi vill ha för vä
 
 ---
 
+**SQL injection - reveal users information (passwords)**
+
+## Exploit
+
+1. Gå till hemsidan `(http://localhost:8080/)`
+2. Logga in som användare och gå in på `PLAY` fliken.
+3. Filterera quizarna genom att trycka på `FILTER` så URL sätts till `http://localhost:8080/play?operator=%3E%3D&questions=0`
+4. Ändra URL så den blir: `http://localhost:8080/play?operator=UNION SELECT username, password_hash, username, username, username FROM user;&questions=0 `.
+5. Genom att ladda in den nya URL i webbläsaren kommer användarnas lösenord och användarnamn laddas in som Quizar och du har fri tillgång till att komma åt dem. 
+
+
+## Vulnerability
+
+Sårbarheten ligger i metoden ``quizListPage``:
+
+            // If the user has entered a min/max/exact number of questions, add an extra condition.
+            if (context.queryParam("questions") != null) {
+                String operator = context.queryParam("operator");
+                int questions = Integer.parseInt(context.queryParam("questions"));
+                System.out.println(operator);
+                sql += "HAVING COUNT(*) " + operator + " " + questions + " ";
+            }
+
+`UNION SELECT username, password_hash, username, username, username FROM user;`
+
+## Fix
+
+Vi lägger in följande kod i ``quizListPage``:
+
+            if (context.queryParam("questions") != null) {
+                String operator = context.queryParam("operator");
+                if(!operator.equals("=") && !operator.equals(">=") && !operator.equals("<=") ){
+                    context.redirect("/play");
+                }
+                int questions = Integer.parseInt(context.queryParam("questions"));
+                sql += "HAVING COUNT(*) " + operator + " " + questions + " ";
+            }
+
+
+---
+
+**XSS - Create quiz**
+
+## Exploit
+
+## Vulnerability
+
+<img src=1 onerror='/* Bad stuff here... */'>
+
+## Fix
+
+---
+
 ## 2. Access control
 
 | 	         | 1 	   | 2     | 3	    | 4  	  | 5	   |
@@ -302,9 +355,9 @@ Hade man gjort en riktig lösenordsattack hade hackern antagligen inte haft till
 
 3. <b>Hur skulle applikationen behöva ändras för att förhindra denna attack? Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader. </b>
 
-För att förhundra denna attack kan man lägga till `Salt` på alla de sparade lösenorden. `Salt`är ett extra slags lager som hashar lösenorden med unika tecken för att öka deras komplexitet
+För att förhindra denna attack kan man lägga till `Salt` på alla de sparade lösenorden. `Salt`är ett extra slags lager som hashar lösenorden med unika tecken för att öka deras komplexitet
 utan att försvåra det för användarna när dem väljer lösenord. Så även om vi har flera användare som har samma lösenord kommer alla dessa lösenord få unika tecken och göra det extra svårt för hackers att 
-knäcka lösenorden i en eventuell läcka. Att addera salt på lösenorden saktar även ner poteniella `dictonary och brut-force attacker`.
+knäcka lösenorden i en eventuell läcka. Att addera salt på lösenorden saktar även ner poteniella `dictionary och brut-force attacker`.
 
 Först skapas unik salt:
 
@@ -354,6 +407,8 @@ Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/ell
 Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
 eller hemsidan ska låta användaren testa att logga in igen. <br>
 
+Detta gör man via login metoden där man 
+
 Ändra log in metoden. 
 
 **!BEHÖVS GÖRAS KLART!**
@@ -372,4 +427,6 @@ Användare kan använda inputs till att göra allt från att få fram hemliga fi
 Jag tar även med mig all bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
 begränsningarna man lägger in fungerar. 
 
-Lösenord 
+Lösenord
+**!BEHÖVS GÖRAS KLART!**
+
