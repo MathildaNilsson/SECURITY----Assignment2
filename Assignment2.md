@@ -308,11 +308,58 @@ Vi lägger in följande kod i ``quizListPage``:
 2. När du ska skriva in frågan till ditt quiz anger du:  `<img src=1 onerror='alert("")'>`, fyller i svarsalternativ och sedan sparar du quizen.
 3. Detta kommer göra att varje gång man går in på ``play`` -fliken, väljer den skapade quizen och programet laddar in quizen kommer användaren få en `alert` - ruta.
 
-
 ## Vulnerability
+
+Sårbarheten finns i metoden `createQuiz`:
+
+
+            while (context.formParam("question-" + questionNumber + "-prompt") != null) {
+                // All the params from here will start with the prefix "question-x-", where x is the number, so
+                // create it here.
+                String prefix = "question-" + questionNumber + "-";
+
+och även i metoden `singleQuizData`:
+
+                String questionSql =
+                    "SELECT * " +
+                    "FROM question " +
+                    "WHERE quiz_id = " + quizRows.getInt("id") + " " +
+                    "ORDER BY number";
+                ResultSet questionRows = questionStatement.executeQuery(questionSql);
+
+                while (questionRows.next()) {
+                    Map<String, Object> question = new HashMap<>();
+                    question.put("prompt", questionRows.getString("prompt"));
+                    question.put("option_1", questionRows.getString("option_1"));
+                    question.put("option_2", questionRows.getString("option_2"));
+
+
+
+Genom att användarens inmatning av titeln tas in som en sträng genom `context.formParam` och inte kontrolleras har användaren
+fritt fram till att skriva in vilken sträng den vill. Eftersom vi inte har en metod som kollar eller begränsar vad det är för tecken
+som kommer in av användaren kan den skriva in tecken som `<`, `>` och på så sätt för det möjligt att utsätta hemsidan för en
+cross site script attack.
+
+`String title` blir resultatet av inputen i `context.formParam` och sätts direkt in i databasen. Detta gör att varje gång någon öppnar
+`Play` fliken i spelet kommer titlarna laddas in och har man tillgång till denna quiz där attacken är skapad i titeln kommer man bli utsatt
+för attacken.
+
+Detta är en `Stored XSS Attacks` eftersom att attacken är permanent lagrad via titel i quizzens databas. Den som blir utsatt för attacken blir utsatt när
+applikationen hämtar information från databasen där scriptet är lagrat.
 
 
 ## Fix
+
+Vi lägger till en `Encode` i `singleQuizData`:
+
+                while (questionRows.next()) {
+                    Map<String, Object> question = new HashMap<>();
+                    question.put("prompt", Encode.forHtml(questionRows.getString("prompt")));
+                    question.put("option_1", questionRows.getString("option_1"));
+                    question.put("option_2", questionRows.getString("option_2"));
+
+Encoda all output som kommer från databasen. Encodar man innan kan gammal kod fortfarande förstöra. 
+
 
 ---
 
