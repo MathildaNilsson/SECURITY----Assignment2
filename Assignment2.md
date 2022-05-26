@@ -238,7 +238,7 @@ Vilket resulterar i att SQL kommandot kommer hämta quizet med id = 5 och ladda 
 
 ## Fix
 
-Vi täpper igen säkerhetshålet genom att använda oss av PreparedStatement:
+Vi täpper igen säkerhetshålet genom att använda oss av `PreparedStatement`:
 
     private static void singleQuizData(Context context) throws SQLException {
         try (Connection c = db.getConnection()) {
@@ -304,9 +304,13 @@ Vi lägger in följande kod i ``quizListPage``:
 
 ## Exploit
 
+1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj fliken ``CREATE`.
+2. När du ska skriva in frågan till ditt quiz anger du:  `<img src=1 onerror='alert("")'>`, fyller i svarsalternativ och sedan sparar du quizen.
+3. Detta kommer göra att varje gång man går in på ``play`` -fliken, väljer den skapade quizen och programet laddar in quizen kommer användaren få en `alert` - ruta.
+
+
 ## Vulnerability
 
-<img src=1 onerror='/* Bad stuff here... */'>
 
 ## Fix
 
