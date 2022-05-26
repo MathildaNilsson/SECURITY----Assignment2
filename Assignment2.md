@@ -4,7 +4,7 @@ Mathilda Nilsson
 
 ## 1. Säkerhetshål
 
-**XSS - create quiz**
+**(1)XSS - create quiz**
 
 ## Exploit
 1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj ``create quiz``.
@@ -69,7 +69,7 @@ Resultatet av Encode är det som vi lägger in i vårt prepared statement för a
 
 ---
 
-**XSS - Search**
+**(2)XSS - Search**
 
 ## Exploit
 
@@ -135,7 +135,7 @@ Applikationen kommer att leta efter ett sökresultat som är encodat till en ren
 ---
 
 
-**Path traversal - pom.xml**
+**(3)Path traversal - pom.xml**
 
 ## Exploit
 
@@ -198,7 +198,7 @@ att det inte är tillåtet att komma åt andra mappar än den utvecklaren satt u
 
 ---
 
-**SQL injection - reveal private quiz**
+**(4)SQL injection - reveal private quiz**
 
 ## Exploit
 
@@ -251,7 +251,7 @@ Vi täpper igen säkerhetshålet genom att använda oss av PreparedStatement:
             s.setString(4,context.pathParam("quiz_id"));
             ResultSet quizRows = s.executeQuery();
 
-Genom att använda oss av PreparedStatements kan vi begränsa användarinput i URL som sätts i ``pathParam``. PreparedStatements kommer att tolka inputen som värden och inte som ett rent SQL query där `'` används som fritext och som en hacker kan utnyttja och sätta in eget `'` för att ändra queryt.
+Genom att använda oss av PreparedStatements kan vi begränsa användarinput i URL som sätts i ``pathParam``. PreparedStatements kommer att tolka inputen som värden och inte som ett rent SQL query där `--` används som fritext och som en hacker kan utnyttja och sätta in `--` för att ändra queryt.
 
 Utan det som PreparedStatement hjälper oss att göra är vi specificerar vart i queryt vi vill ha användarens input med `?`.
 Vi kan sedan med hjälp av PreparedStatement specificera vad vi vill ha för värde på varje `?` med `setString`, `setInt`, `setBoolean` och applikationen kommer då att endast tolka varje värde som en satt sträng.
@@ -259,7 +259,7 @@ Vi kan sedan med hjälp av PreparedStatement specificera vad vi vill ha för vä
 
 ---
 
-**SQL injection - reveal users information (passwords)**
+**(5)SQL injection - reveal users information (passwords)**
 
 ## Exploit
 
@@ -300,7 +300,7 @@ Vi lägger in följande kod i ``quizListPage``:
 
 ---
 
-**XSS - Create quiz**
+**(6)XSS - Create quiz**
 
 ## Exploit
 
@@ -368,12 +368,9 @@ Först skapas unik salt:
         return salt;
     }
 
-Sedan skickar man in `lösenord` och `salt` för att säkerställa att alla sparade lösenord blir unika hash:
-
+Sedan skickar man in `lösenord` och `salt` i metoden `createHash` för att säkerställa att alla sparade lösenord blir unika hash:
 
     public static String createHash(String password, String salt) {
-        try {
-            // NIST recommends an iteration count of at least 10,000.
             KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 10000, 256);
             byte[] hashBytes = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec).getEncoded();
             String hash = Hex.encodeHexString(hashBytes);
@@ -404,14 +401,32 @@ Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i o
 3. <b>Hur skulle applikationen behöva ändras för att begränsa antalet inloggningsförsök på detta sätt? 
 Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.</b>
 
-Man behöver sätta en gräns på hur många gånger som en användare kan skriva in fel användarnamn och lösenord och efter det sätta en gräns på efter hur lång tid applikationen
-eller hemsidan ska låta användaren testa att logga in igen. <br>
+Som vi ser i exemplet ovan är det enormt stor skillnad på hur lång tid det tar att hacka en användare beroende på vad för begränsningar vi sätter i vår applikation. 
+Om vi inte har några begränsningar kan vi tex se att `Angelinas` profil endast tar ca 7,5 sekund att ta sig in i tillskillnad när vi sätter 5 inloggningar/minut kan det ta hela 
+10-11 dagar vilket då skulle kunna upptäckas och förhindras. 
+<br><br>
+För att förhindra att en hacker kan mata in hur många inloggningsförsök som helst under obegränsad tid och på så sätt få hur mycket tid på sig att hacka sig in behöver man sätta begränsning i `inloggnings-metoden`. 
+För att hålla koll på hur många inloggningsförsök som gjort är det bra att logga tex. typ av aktivitet (inloggning), användarnamn, tid på försöket. Detta kan göras in i en databas eller i ett textdokument där man kan hämta
+information om aktiviteten. Viktigt är att även logga de inloggningar som har lyckats, för även om man matar in rätt uppgifter kan det ju vara så att användaren bara försöker sig på en gissning. Är det det då sista försöket i en attack så
+ska vi även stänga ute den som matar in uppgifterna även om de är rätt. **OBS!** `Släpp alltid in användaren först efter att du kollat hur många gånger dem försökt logga in!` Genom att logga olika händelser i ens applikation kan man även kolla tillbaka på ovanlig aktivitet och försöka stoppa attacker, lista ut vad som hänt eller är påväg att hända. 
+Då kan man även höra av sig till kunder/användare/medlemmar om ovanlig aktivitet på deras konto och uppmana till lösenordsbyte. <br>
+<br>
+Det finns olika sätt att göra detta på i sin kod och det finns även vissa språk/ramverk som har dessa funktioner inbyggda. 
+Tex Javalin som har en `rate limiting` man kan använda: 
 
-Detta gör man via login metoden där man 
+        app.get("/") { ctx ->
+                RateLimit(ctx).requestPerTimeUnit(5, TimeUnit.MINUTES) // throws if rate limit is exceeded
+            ctx.status("Hello, rate-limited World!")
+        }
 
-Ändra log in metoden. 
+Här hjälper Javalin dig automatiskt med att hålla koll på IP address och antal request som kommer från den. Om en användare försöker skicka samma request mer än 5 gånger under 1 minut kommer applikationen att 
+skicka en `exception` och blockera IP addressen tills dess att en ny minut påbörjas. 
 
-**!BEHÖVS GÖRAS KLART!**
+Det finns såklart nackdelar med alla hanteringar av detta och inget är än perfekt då det finns vägar runt och kommer alltid finnas personer som kommer försöka hitta dessa vägar. 
+Eftersom att vi på detta sätt bara blockerar försöken efter 1 minut, så öppnas sedan ändå möjligheten upp för att fortsätta försöka 5 gånger till igen och igen. Har då den som utför attacken även möjlighet till 
+flera datorer/IP addresser kan den ändå köra fler än 5 försök/ minut. Detta skulle isåfall kunna undvikas genom att ha ett system som loggar både IP-address och användarnamn så att även om det är olika IP-addresser som föröker
+komma åt samma konto, så håller man koll på vilket användarnamn det är som är utsatt. 
+
 
 ---
 ## 5. Säkerhetsprinciper
@@ -424,9 +439,12 @@ Dels har man fått stor inblick i hur stor makt användare kan få om man inte k
 Användare kan använda inputs till att göra allt från att få fram hemliga filer genom `Path Traversal`, skicka in HTML kod via 
 `Cross Site Script` till att få åtkomst till databas via `SQL injection`, vilket kan göra stor skada mot säkerheten. 
 <br><br>
-Jag tar även med mig all bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
-begränsningarna man lägger in fungerar. 
+Vi har fått bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
+begränsningarna man lägger in fungerar. Det har vart kul att lära sig dokumentera säkerhetshålen och skriva: `exploit`,`vulnerability`, `fix`.
+<br><br>
+En extra tankeställare har man verkligen fått av materialet med lösenordsanvändning. Hur enkelt och effektivt det kan vara för en hacker att försöka
+knäcka ett hashat lösenord via bruteforce- eller dictionary attacker. 
 
-Lösenord
-**!BEHÖVS GÖRAS KLART!**
+
+
 
