@@ -305,7 +305,7 @@ Detta betyder att lägger hackern in ``UNION SELECT username, password_hash, use
 
 Vilket resulterar i att SQL kommandot kommer att kombinera `UNION` som en andra `SELECT` och ta ut den data ur queryt som vi ber om så länge det är av liknande datatyp som i den första `SELECT` 
 och eftersom att allt laddas in som Strängar och skrivs ut i text på quizzarna är det även möjligt att få ut användarnas användarnamn och lösenord i quizfälten. 
-När man använder sig av `UNION` måste även columnerna vara lika många som i första ´SELECT´ därför kan vi skriva in flera columner av samma typ som i detta fallet när vi använder `username` flera gånger efter varandra. 
+När man använder sig av `UNION` måste även columnerna vara lika många som i första `SELECT` därför kan vi skriva in flera columner av samma typ som i detta fallet när vi använder `username` flera gånger efter varandra. 
 
 
 ## Fix
@@ -320,6 +320,12 @@ Vi lägger in följande kod i ``quizListPage``:
                 int questions = Integer.parseInt(context.queryParam("questions"));
                 sql += "HAVING COUNT(*) " + operator + " " + questions + " ";
             }
+
+Genom att lägga till en begränsning på vad som sätts in via `context.queryParam("operator")` kan vi kontrollera att det enda som sätts via `operator`är de operatorer vi vill att applikationen ska filtrera på: `=`, `>=` och `<=`. 
+Om operator inte är lika med något av dessa tecken så ska användaren skickas tillbaka till `"/play"` sidan och på så sätt inte kunna skriva in vilken sträng den vill. 
+
+Vi löser det på detta sätt för att kunna addera filtret när användaren vill filtrera bland Quizzarna. Skulle vi göra `preparedStatement` vilket egentligen är den bästa lösningen skulle det inte gå att addera
+extra SQL kod till den efteråt så som vi gör nu när vi lägger till SQL-strängen vid filtreringen. Så genom att lösa det på bästa sätt sätter vi begränsningen på användarinput via en `if-sats`. 
 
 
 ---
