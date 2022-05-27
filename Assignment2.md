@@ -321,7 +321,7 @@ Vi lägger in följande kod i ``quizListPage``:
                 sql += "HAVING COUNT(*) " + operator + " " + questions + " ";
             }
 
-Genom att lägga till en begränsning på vad som sätts in via `context.queryParam("operator")` kan vi kontrollera att det enda som sätts via `operator`är de operatorer vi vill att applikationen ska filtrera på: `=`, `>=` och `<=`. 
+Genom att lägga till en begränsning i form av en `if-sats` på vad som kan sättas in via `context.queryParam("operator")` kan vi kontrollera att det enda som sätts via `operator`är de operatorer vi vill att applikationen ska filtrera på: `=`, `>=` och `<=`. 
 Om operator inte är lika med något av dessa tecken så ska användaren skickas tillbaka till `"/play"` sidan och på så sätt inte kunna skriva in vilken sträng den vill. 
 
 Vi löser det på detta sätt för att kunna addera filtret när användaren vill filtrera bland Quizzarna. Skulle vi göra `preparedStatement` vilket egentligen är den bästa lösningen skulle det inte gå att addera
