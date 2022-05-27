@@ -537,7 +537,7 @@ begränsningarna man lägger in fungerar. Det har vart kul att lära sig dokumen
 Dels att man har fått försöka hitta de olika bristerna i en riktig applikation men också att man fått jobba på att täppa igen dem. 
 Det har gjort att man har fått fundera och reflektera över hur de olika säkerhetshålen fungerar och hur man hittar dem.  
 <br>
-Jag tar även med mig om hur lösenordshantering bör fungera för att skydda sina användare. Genom att hasha och salta de spatade lösenorden kan det ta flera timmar
+Jag tar även med mig om hur lösenordshantering bör fungera för att skydda sina användare. Genom att hasha och salta de sparade lösenorden kan det ta flera timmar
 för en hacker att lista ut lösenord om man drabbas av en läcka. Om man dessutom skyddar hemisdan/applikationen genom att sätta begränsningar på hur ofta man kan
 försöka logga in kan det ta flera dagar/månader att försöka hacka sig in. 
 <br>
