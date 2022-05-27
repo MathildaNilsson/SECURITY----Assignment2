@@ -342,13 +342,26 @@ extra SQL kod till den efteråt så som vi gör nu när vi lägger till SQL-str�
 
 Sårbarheten finns i metoden `createQuiz`:
 
-
             while (context.formParam("question-" + questionNumber + "-prompt") != null) {
                 // All the params from here will start with the prefix "question-x-", where x is the number, so
                 // create it here.
                 String prefix = "question-" + questionNumber + "-";
+                PreparedStatement s2 = c.prepareStatement(
+                    "INSERT INTO question " +
+                    "(quiz_id, number, prompt, option_1, 
+                s2.setString(3, context.formParam(prefix + "prompt"));
 
-och även i metoden `singleQuizData`:
+Användarens inmatning av titeln tas in som en ren sträng genom `context.formParam` och inte kontrolleras har användaren
+fritt fram till att skriva in vilken sträng den vill. Eftersom vi inte har en metod som kollar eller begränsar vad det är för tecken
+som kommer in av användaren kan den skriva in tecken som `<`, `>` och på så sätt för det möjligt att utsätta hemsidan för en
+cross site script attack.
+
+`prompt` blir resultatet av inputen i `context.formParam` och sätts direkt in i databasen.
+
+Lägger då en hacker in raden ``<img src=1 onerror='alert("")'>`` så kommer den att fungera så att den kommer leta efter media via `<img` i `src = 1` men eftersom den 
+inte kommer hitta någon ``src`` så kommer den hantera ett `onerror` vilket i detta fallet är `=alert(""")`. 
+
+Sårbarheten finns även i metoden `singleQuizData`:
 
                 String questionSql =
                     "SELECT * " +
@@ -363,18 +376,10 @@ och även i metoden `singleQuizData`:
                     question.put("option_1", questionRows.getString("option_1"));
                     question.put("option_2", questionRows.getString("option_2"));
 
+Där strängen användaren la in i `createQuiz` sedan hämtas upp av `singleQuizData` för att visas upp den aktuella quizen för användaren och det är här som attacken sker
+när sql queryt `questionSql`hämtar datan i databasen. Då visas en `alert`- ruta för den som öppnar quizzen.
 
-
-Genom att användarens inmatning av titeln tas in som en sträng genom `context.formParam` och inte kontrolleras har användaren
-fritt fram till att skriva in vilken sträng den vill. Eftersom vi inte har en metod som kollar eller begränsar vad det är för tecken
-som kommer in av användaren kan den skriva in tecken som `<`, `>` och på så sätt för det möjligt att utsätta hemsidan för en
-cross site script attack.
-
-`String title` blir resultatet av inputen i `context.formParam` och sätts direkt in i databasen. Detta gör att varje gång någon öppnar
-`Play` fliken i spelet kommer titlarna laddas in och har man tillgång till denna quiz där attacken är skapad i titeln kommer man bli utsatt
-för attacken.
-
-Detta är en `Stored XSS Attacks` eftersom att attacken är permanent lagrad via titel i quizzens databas. Den som blir utsatt för attacken blir utsatt när
+Detta är en `Stored XSS Attacks` eftersom att attacken är permanent lagrad via frågan i quizzens databas. Den som blir utsatt för attacken blir utsatt när
 applikationen hämtar information från databasen där scriptet är lagrat.
 
 
@@ -388,7 +393,14 @@ Vi lägger till en `Encode` i `singleQuizData`:
                     question.put("option_1", questionRows.getString("option_1"));
                     question.put("option_2", questionRows.getString("option_2"));
 
-Encoda all output som kommer från databasen. Encodar man innan kan gammal kod fortfarande förstöra. 
+För att skydda applikationen och dem som använder den lägger vi in en `Encode.forHtml` i `singleQuizData` där vi har `questionSql` som är ett SQL query som hämtar
+frågan i databasen för att visa upp enstaka frågor. Detta gör vi här för att encoda all output som kommer från databasen så att även allt som låg i databasen innan vi la in 
+vår encode blir skyddad mot XSS. Skulle vi bara encoda all data som läggs in via `createQuiz` metoden skulle vi fortfarande kunna ha gamla attacker som ligger i databasen och
+inte blir encodade vid output. 
+
+Vi sätter in en `Encode.forHtml` som encodar strängen på HTML kod och detta görs direkt när frågan/strängen hämtas ut databasen. 
+`Encode.forHtml` kommer att ta `<` och `>` som bildar javascript kod och encoda dem till specialtecken vilket gör att det som hämtas
+från databasen blir en ren sträng i form av en fråga och blir ofarlig för applikationen och användare.
 
 
 ---
@@ -500,12 +512,12 @@ Tex Javalin som har en `rate limiting` man kan använda:
             ctx.status("Hello, rate-limited World!")
         }
 
-Här hjälper Javalin dig automatiskt med att hålla koll på IP address och antal request som kommer från den. Om en användare försöker skicka samma request mer än 5 gånger under 1 minut kommer applikationen att 
-skicka en `exception` och blockera IP addressen tills dess att en ny minut påbörjas. 
+Här hjälper Javalin dig automatiskt med att hålla koll på IP adress och antal request som kommer från den. Om en användare försöker skicka samma request mer än 5 gånger under 1 minut kommer applikationen att 
+skicka en `exception` och blockera IP adressen tills dess att en ny minut påbörjas. 
 
 Det finns såklart nackdelar med alla hanteringar av detta och inget är än perfekt då det finns vägar runt och kommer alltid finnas personer som kommer försöka hitta dessa vägar. 
 Eftersom att vi på detta sätt bara blockerar försöken efter 1 minut, så öppnas sedan ändå möjligheten upp för att fortsätta försöka 5 gånger till igen och igen. Har då den som utför attacken även möjlighet till 
-flera datorer/IP addresser kan den ändå köra fler än 5 försök/ minut. Detta skulle isåfall kunna undvikas genom att ha ett system som loggar både IP-address och användarnamn så att även om det är olika IP-addresser som föröker
+flera datorer/IP adresser kan den ändå köra fler än 5 försök/ minut. Detta skulle isåfall kunna undvikas genom att ha ett system som loggar både IP-adress och användarnamn så att även om det är olika IP-adresser som försöker
 komma åt samma konto, så håller man koll på vilket användarnamn det är som är utsatt. 
 
 
