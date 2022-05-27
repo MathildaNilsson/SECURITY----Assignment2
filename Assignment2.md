@@ -544,7 +544,8 @@ försöka logga in kan det ta flera dagar/månader att försöka hacka sig in.
 
 En extra tankeställare har man verkligen fått privat som med materialet med lösenordsanvändning. Hur enkelt och effektivt det kan vara för en hacker att försöka
 knäcka ett hashat lösenord via bruteforce- eller dictionary attacker och hur dem kan kommas åt/läcka ut. Hur enkelt det är att knäcka väldigt allmänt lösenord som lätt går att 
-hitta bland vanliga lösenord eller liknande. Jag har allid försökt skapa unika lösenord men nu har jag verkligen fått med mig om att ha _olika_ lösenord på varje sida.
+hitta bland vanliga lösenord eller liknande. Jag har allid försökt skapa unika lösenord men nu har jag verkligen fått med mig om att ha _olika_ lösenord på varje sida också så att ens
+läckta lösenord inte gör att hela ens bibliotek med medlemskap blir attackerat. 
 
 
 
