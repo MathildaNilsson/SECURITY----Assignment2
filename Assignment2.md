@@ -278,11 +278,35 @@ Sårbarheten ligger i metoden ``quizListPage``:
             if (context.queryParam("questions") != null) {
                 String operator = context.queryParam("operator");
                 int questions = Integer.parseInt(context.queryParam("questions"));
-                System.out.println(operator);
                 sql += "HAVING COUNT(*) " + operator + " " + questions + " ";
             }
 
-`UNION SELECT username, password_hash, username, username, username FROM user;`
+Detta funkar på grund av att applikationen använder sig av ren SQL i executeQuery. `Operator` tas in via `context.queryParam("operator")` som ska sättas av applikationen via `FILTER` men eftersom att den sätts via `queryParam` går denna att ändras manuellt i URL.
+Strängen adderas sedan till orginal SQL queryt som är skapat som ren SQL i form av strängar som adderas med varandra:
+
+            String sql =
+                "SELECT quiz.id AS quiz_id, title, username, public, COUNT(*) AS question_count " +
+                "FROM quiz " +
+                "JOIN user ON quiz.user_id = user.id " +
+                "JOIN question ON quiz.id = question.quiz_id " +
+                "WHERE public = TRUE OR user.id = " + context.sessionAttribute("userId") + " " +
+                "GROUP BY quiz.id ";
+
+Detta betyder att lägger hackern in ``UNION SELECT username, password_hash, username, username, username FROM user;`` kommer SQL queryt ändras till: <br>
+
+    String sql =
+            "SELECT quiz.id AS quiz_id, title, username, public, COUNT(*) AS question_count " +
+                    "FROM quiz " +
+                    "JOIN user ON quiz.user_id = user.id " +
+                    "JOIN question ON quiz.id = question.quiz_id " +
+                    "WHERE public = TRUE OR user.id = " + context.sessionAttribute("userId") + " " +
+                    "GROUP BY quiz.id " +
+                    "HAVING COUNT(*) UNION SELECT username, password_hash, username, username, username FROM user; 0 ORDER BY quiz.title, user.username"
+
+Vilket resulterar i att SQL kommandot kommer att kombinera `UNION` som en andra `SELECT` och ta ut den data ur queryt som vi ber om så länge det är av liknande datatyp som i den första `SELECT` 
+och eftersom att allt laddas in som Strängar och skrivs ut i text på quizzarna är det även möjligt att få ut användarnas användarnamn och lösenord i quizfälten. 
+När man använder sig av `UNION` måste även columnerna vara lika många som i första ´SELECT´ därför kan vi skriva in flera columner av samma typ som i detta fallet när vi använder `username` flera gånger efter varandra. 
+
 
 ## Fix
 
