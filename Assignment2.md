@@ -226,10 +226,10 @@ Sårbarheten finns i metoden `singleQuizData`:
                 "OR public = TRUE AND id = " + context.pathParam("quiz_id");
             ResultSet quizRows = quizStatement.executeQuery(quizSql);
 
-När hackern använder sig av `--` gör man detta för att använda sig av SQL kommentars syntax. Det som matas in efter och hämtas av SQL queryt -- kommer bli bortkommenterat.
-Detta funkar pga att applikationen använder sig av ren SQL i executeQuery. quizid sätts i metoden `context.sessionAttribute("userId")` där quizid sätts i URL och requestar efter den specifika quizen med det id:et.
+När hackern använder sig av `--` gör man detta för att använda sig av SQL kommentars syntax. Det som matas in efter och hämtas av SQL queryt `--` kommer bli bortkommenterat.
+Detta funkar pga att applikationen använder sig av ren SQL i executeQuery. Quizid sätts i metoden `context.sessionAttribute("userId")` där quizid sätts i URL och requestar efter den specifika quizen med det id:et.
 SQL queryt som skickas till databasen blir då: `ResultSet quizRows = quizStatement.executeQuery(quizSql);` där `String quizSql` är : `SELECT * FROM quiz WHERE id = 5 AND user_id = 1 OR public = TRUE AND id = 5`
-Resultatet är tänkt att bli att användaren ska få fram quizzet med id 5 och som är publikt för just den användaren som är inloggad. 
+Resultatet är tänkt att bli så att användaren ska få fram quizzet med id 5 och som är publikt för just den användaren som är inloggad. 
 
 Detta betyder att lägger hackern in ``--`` kommer SQL queryt ändras till:
 `SELECT * FROM quiz WHERE id = 5`
@@ -304,7 +304,7 @@ Vi lägger in följande kod i ``quizListPage``:
 
 ## Exploit
 
-1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj fliken ``CREATE`.
+1. Logga in som användare på hemsidan ``http://localhost:8080/`` och välj fliken `CREATE`.
 2. När du ska skriva in frågan till ditt quiz anger du:  `<img src=1 onerror='alert("")'>`, fyller i svarsalternativ och sedan sparar du quizen.
 3. Detta kommer göra att varje gång man går in på ``play`` -fliken, väljer den skapade quizen och programet laddar in quizen kommer användaren få en `alert` - ruta.
 
@@ -453,7 +453,7 @@ Ge ett exakt svar, inte en approximation. Förutsätt att lösenorden testas i o
 Förklara på teknisk nivå, inklusive referenser till relevanta metoder och/eller kodrader.</b>
 
 Som vi ser i exemplet ovan är det enormt stor skillnad på hur lång tid det tar att hacka en användare beroende på vad för begränsningar vi sätter i vår applikation. 
-Om vi inte har några begränsningar kan vi tex se att `Angelinas` profil endast tar ca 7,5 sekund att ta sig in i tillskillnad när vi sätter 5 inloggningar/minut kan det ta hela 
+Om vi inte har några begränsningar kan vi tex se att `Angelinas` profil endast tar ca 7,5 minuter att ta sig in i till skillnad när vi sätter 5 inloggningar/minut kan det ta hela 
 10-11 dagar vilket då skulle kunna upptäckas och förhindras. 
 <br><br>
 För att förhindra att en hacker kan mata in hur många inloggningsförsök som helst under obegränsad tid och på så sätt få hur mycket tid på sig att hacka sig in behöver man sätta begränsning i `inloggnings-metoden`. 
