@@ -532,12 +532,19 @@ Dels har man fått stor inblick i hur stor makt användare kan få om man inte k
 Användare kan använda inputs till att göra allt från att få fram hemliga filer genom `Path Traversal`, skicka in HTML kod via 
 `Cross Site Script` till att få åtkomst till databas via `SQL injection`, vilket kan göra stor skada mot säkerheten. 
 <br><br>
-Vi har fått bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
-begränsningarna man lägger in fungerar. Det har vart kul att lära sig dokumentera säkerhetshålen och skriva: `exploit`,`vulnerability`, `fix`.
-<br><br>
-En extra tankeställare har man verkligen fått av materialet med lösenordsanvändning. Hur enkelt och effektivt det kan vara för en hacker att försöka
-knäcka ett hashat lösenord via bruteforce- eller dictionary attacker. 
+Jag tycker vi har fått bra kunskap om att täppa igen säkerhetshålen och hur man begränsar att få en potentiell attack mot sig och hur 
+begränsningarna man lägger in fungerar. Det har vart kul att lära sig dokumentera säkerhetshålen och skriva de olika: `exploit`,`vulnerability`, `fix`.
+Dels att man har fått försöka hitta de olika bristerna i en riktig applikation men också att man fått jobba på att täppa igen dem. 
+Det har gjort att man har fått fundera och reflektera över hur de olika säkerhetshålen fungerar och hur man hittar dem.  
+<br>
+Jag tar även med mig om hur lösenordshantering bör fungera för att skydda sina användare. Genom att hasha och salta de spatade lösenorden kan det ta flera timmar
+för en hacker att lista ut lösenord om man drabbas av en läcka. Om man dessutom skyddar hemisdan/applikationen genom att sätta begränsningar på hur ofta man kan
+försöka logga in kan det ta flera dagar/månader att försöka hacka sig in. 
+<br>
 
+En extra tankeställare har man verkligen fått privat som med materialet med lösenordsanvändning. Hur enkelt och effektivt det kan vara för en hacker att försöka
+knäcka ett hashat lösenord via bruteforce- eller dictionary attacker och hur dem kan kommas åt/läcka ut. Hur enkelt det är att knäcka väldigt allmänt lösenord som lätt går att 
+hitta bland vanliga lösenord eller liknande. Jag har allid försökt skapa unika lösenord men nu har jag verkligen fått med mig om att ha _olika_ lösenord på varje sida.
 
 
 
